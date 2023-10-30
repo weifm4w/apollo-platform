@@ -61,7 +61,7 @@ public:
   }
 
   /**
-   * \brief Init all blocks from publisher, before publisher write fisrt msg
+   * \brief Init all blocks from publisher, before publisher write first msg
    *
    * @param segment: segment pointer
    * @param queue_size: total block num which needs to be allocated

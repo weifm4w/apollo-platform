@@ -96,6 +96,7 @@ public:
 protected:
   bool verifyDatatype(const std::string &datatype);
 
+  // mark:本SubscriberLink对应的Publisher
   PublicationWPtr parent_;
   unsigned int connection_id_;
   std::string destination_caller_id_;

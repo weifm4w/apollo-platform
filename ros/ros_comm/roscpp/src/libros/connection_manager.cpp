@@ -69,13 +69,11 @@ ConnectionManager::~ConnectionManager()
 void ConnectionManager::start()
 {
   poll_manager_ = PollManager::instance();
-  poll_conn_ = poll_manager_->addPollThreadListener(boost::bind(&ConnectionManager::removeDroppedConnections, 
-								this));
+  poll_conn_ = poll_manager_->addPollThreadListener(boost::bind(&ConnectionManager::removeDroppedConnections, this));
 
   // Bring up the TCP listener socket
   tcpserver_transport_ = boost::make_shared<TransportTCP>(&poll_manager_->getPollSet());
-  if (!tcpserver_transport_->listen(network::getTCPROSPort(), 
-				    MAX_TCPROS_CONN_QUEUE, 
+  if (!tcpserver_transport_->listen(network::getTCPROSPort(), MAX_TCPROS_CONN_QUEUE, 
 				    boost::bind(&ConnectionManager::tcprosAcceptConnection, this, _1)))
   {
     ROS_FATAL("Listen on port [%d] failed", network::getTCPROSPort());
@@ -151,6 +149,7 @@ void ConnectionManager::addConnection(const ConnectionPtr& conn)
 {
   boost::mutex::scoped_lock lock(connections_mutex_);
 
+  // mark:建立连接后，关注连接断开
   connections_.insert(conn);
   conn->addDropListener(boost::bind(&ConnectionManager::onConnectionDropped, this, _1));
 }
@@ -189,6 +188,7 @@ void ConnectionManager::udprosIncomingConnection(const TransportUDPPtr& transpor
   addConnection(conn);
 
   conn->initialize(transport, true, NULL);
+  // mark: UDP包马上解析消息头
   onConnectionHeaderReceived(conn, header);
 }
 
@@ -200,6 +200,7 @@ void ConnectionManager::tcprosAcceptConnection(const TransportTCPPtr& transport)
   ConnectionPtr conn(boost::make_shared<Connection>());
   addConnection(conn);
 
+  // mark:建立连接后，解析消息头，然后根据解析事件串联调用
   conn->initialize(transport, true, boost::bind(&ConnectionManager::onConnectionHeaderReceived, this, _1, _2));
 }
 
@@ -207,6 +208,7 @@ bool ConnectionManager::onConnectionHeaderReceived(const ConnectionPtr& conn, co
 {
   bool ret = false;
   std::string val;
+  // mark:建立的连接可以是topic和service
   if (header.getValue("topic", val))
   {
     ROSCPP_LOG_DEBUG("Connection: Creating TransportSubscriberLink for topic [%s] connected to [%s]", 

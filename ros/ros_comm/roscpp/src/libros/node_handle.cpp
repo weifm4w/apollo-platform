@@ -295,9 +295,11 @@ Publisher NodeHandle::advertise(AdvertiseOptions& ops)
     }
   }
 
+  // mark:订阅端连接状态变化回调 callbacks
   SubscriberCallbacksPtr callbacks(boost::make_shared<SubscriberCallbacks>(ops.connect_cb, ops.disconnect_cb, 
                                                                            ops.tracked_object, ops.callback_queue));
 
+  // mark:发布身份Publisher
   if (TopicManager::instance()->advertise(ops, callbacks))
   {
     Publisher pub(ops.topic, ops.md5sum, ops.datatype, ops.message_definition, *this, callbacks, ops.queue_size);

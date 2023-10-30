@@ -61,9 +61,9 @@ namespace sharedmem_transport
 const float ROS_SHM_BLOCK_SIZE_RATIO = 1.5; // Allocated size compared to msg size for each block, default 1.5
 const int ROS_SHM_UTIL_SEGMENT_NAME_SIZE = 1000; // Util segment name temp size
 const int32_t ROS_SHM_SEGMENT_WROTE_NUM = -2; // Reallocated flag
-const uint64_t ROS_SHM_BLOCK_MAX_SIZE = 12000000; // Block max size, Bit
-const uint64_t ROS_SHM_BLOCK_SIZE = 2000000; // Block size, Bit
-const uint64_t ROS_SHM_SEGMENT_SIZE = 3000000; // Segment size, Bit
+const uint64_t ROS_SHM_BLOCK_MAX_SIZE = 12000000; // Block max size, Bit, 12M
+const uint64_t ROS_SHM_BLOCK_SIZE = 2000000; // Block size, Bit, 2M
+const uint64_t ROS_SHM_SEGMENT_SIZE = 3000000; // Segment size, Bit, 3M
 const uint32_t ROS_SHM_BLOCK_MUTEX_TIMEOUT_SEC = 1; // Timeout for block mutex, sec
 
 /**

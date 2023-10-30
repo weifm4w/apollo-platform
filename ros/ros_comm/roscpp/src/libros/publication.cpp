@@ -38,7 +38,7 @@
 
 namespace ros
 {
-
+// mark:对端连接事件回调
 class PeerConnDisconnCallback : public CallbackInterface
 {
 public:
@@ -108,6 +108,7 @@ void Publication::addCallbacks(const SubscriberCallbacksPtr& callbacks)
 
   callbacks_.push_back(callbacks);
 
+  // mark:connect_是用户注册的关注连接事件回调,要求有callback_queue_才能回调
   // Add connect callbacks for all current subscriptions if this publisher wants them
   if (callbacks->connect_ && callbacks->callback_queue_)
   {
@@ -117,6 +118,7 @@ void Publication::addCallbacks(const SubscriberCallbacksPtr& callbacks)
     for (; it != end; ++it)
     {
       const SubscriberLinkPtr& sub_link = *it;
+      // mark:对端连接事件
       CallbackInterfacePtr cb(boost::make_shared<PeerConnDisconnCallback>(callbacks->connect_, sub_link, callbacks->has_tracked_object_, callbacks->tracked_object_));
       callbacks->callback_queue_->addCallback(cb, (uint64_t)callbacks.get());
     }
@@ -262,6 +264,7 @@ extern struct ConfigComm g_config_comm;
 
 void Publication::addSubscriberLink(const SubscriberLinkPtr& sub_link)
 {
+  // mark:sub_link 是建立连接的Subscriber代理
   {
     boost::mutex::scoped_lock lock(subscriber_links_mutex_);
 
@@ -293,6 +296,7 @@ void Publication::addSubscriberLink(const SubscriberLinkPtr& sub_link)
     sub_link->setDefaultTransport(true);
     ROS_DEBUG_STREAM("Publication topic latched:" << getName());
   }
+  // mark:transport_mode.yml配置是共享内存,且不在白名单,则用共享内存通信(白名单是：即使用共享内存也用socket通信)
   else if (!g_config_comm.transport_mode && 
     g_config_comm.topic_white_list.find(getName()) == g_config_comm.topic_white_list.end() )
   {
@@ -338,7 +342,7 @@ void Publication::addSubscriberLink(const SubscriberLinkPtr& sub_link)
     sub_link->setDefaultTransport(true);
   }
 
-
+  // mark:设置了latch_，则发送缓存消息
   if (latch_ && last_message_.buf)
   {
     if (sub_link->getDefaultTransport()) 
@@ -455,6 +459,7 @@ void Publication::dropAllConnections()
 
 void Publication::peerConnect(const SubscriberLinkPtr& sub_link)
 {
+  // mark:callbacks_是用户创建Publisher时通过advertise注册的连接状态回调
   V_Callback::iterator it = callbacks_.begin();
   V_Callback::iterator end = callbacks_.end();
   for (; it != end; ++it)
@@ -581,7 +586,7 @@ void Publication::processPublishQueue()
   V_SerializedMessage::iterator end = queue.end();
   for (; it != end; ++it)
   {
-    enqueueMessage(*it);
+    enqueueMessage(*it);  // mark:把消息放入待发送队列,并触发发送机制
   }
 }
 

@@ -121,7 +121,7 @@ public:
     params.connection_header = link_->getConnection()->getHeader().getValues();
     try
     {
-
+      // MARK: 回调用户处理函数
       bool ok = helper_->call(params);
       if (ok != 0)
       {
@@ -158,7 +158,7 @@ private:
 void ServicePublication::processRequest(boost::shared_array<uint8_t> buf, size_t num_bytes, const ServiceClientLinkPtr& link)
 {
   CallbackInterfacePtr cb(boost::make_shared<ServiceCallback>(helper_, buf, num_bytes, link, has_tracked_object_, tracked_object_));
-  callback_queue_->addCallback(cb, (uint64_t)this);
+  callback_queue_->addCallback(cb, (uint64_t)this); // MARK: call请求放入callback queue处理
 }
 
 void ServicePublication::addServiceClientLink(const ServiceClientLinkPtr& link)

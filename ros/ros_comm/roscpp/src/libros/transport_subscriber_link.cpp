@@ -78,6 +78,7 @@ bool TransportSubscriberLink::handleHeader(const Header& header)
   // This will get validated by validateHeader below
   std::string client_callerid;
   header.getValue("callerid", client_callerid);
+  // mark:根据topic获取发布者
   PublicationPtr pt = TopicManager::instance()->lookupPublication(topic);
   if (!pt)
   {
@@ -112,6 +113,7 @@ bool TransportSubscriberLink::handleHeader(const Header& header)
   destination_caller_id_ = client_callerid;
   connection_id_ = ConnectionManager::instance()->getNewConnectionID();
   topic_ = pt->getName();
+  // mark:本SubscriberLink对应的Publisher
   parent_ = PublicationWPtr(pt);
 
   // Send back a success, with info
@@ -122,8 +124,10 @@ bool TransportSubscriberLink::handleHeader(const Header& header)
   m["callerid"] = this_node::getName();
   m["latching"] = pt->isLatching() ? "1" : "0";
   m["topic"] = topic_;
+  // mark:发布者应答
   connection_->writeHeader(m, boost::bind(&TransportSubscriberLink::onHeaderWritten, this, _1));
 
+  // mark:添加订阅者到发布者队列
   pt->addSubscriberLink(shared_from_this());
 
   return true;
@@ -202,6 +206,7 @@ void TransportSubscriberLink::enqueueMessage(const SerializedMessage& m, bool se
 
     ROS_DEBUG_NAMED("superdebug", "TransportSubscriberLink on topic [%s] to caller [%s], queueing message (queue size [%d])", topic_.c_str(), destination_caller_id_.c_str(), (int)outbox_.size());
 
+    // MARK:待发送队列 outbox_ 已满
     if (max_queue > 0 && (int)outbox_.size() >= max_queue)
     {
       if (!queue_full_)
@@ -219,7 +224,7 @@ void TransportSubscriberLink::enqueueMessage(const SerializedMessage& m, bool se
       queue_full_ = false;
     }
 
-    outbox_.push(m);
+    outbox_.push(m);  // mark:缓存待发布的消息
   }
 
   startMessageWrite(false);

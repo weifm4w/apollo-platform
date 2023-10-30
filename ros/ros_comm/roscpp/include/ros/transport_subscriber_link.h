@@ -62,15 +62,15 @@ private:
   void onMessageWritten(const ConnectionPtr& conn);
   void startMessageWrite(bool immediate_write);
 
-  bool writing_message_;
+  bool writing_message_;  // mark:有数据要写
   bool header_written_;
 
   ConnectionPtr connection_;
   boost::signals2::connection dropped_conn_;
 
-  std::queue<SerializedMessage> outbox_;
+  std::queue<SerializedMessage> outbox_;  // mark:待发布的消息
   boost::mutex outbox_mutex_;
-  bool queue_full_;
+  bool queue_full_; // mark:outbox_的大小大于Publisher指定Topic的queue size时置true
 };
 typedef boost::shared_ptr<TransportSubscriberLink> TransportSubscriberLinkPtr;
 

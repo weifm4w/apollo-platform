@@ -171,7 +171,7 @@ void PollSet::signal()
   }
 }
 
-
+// mark: poll_timeout: milliseconds
 void PollSet::update(int poll_timeout)
 {
   createNativePollset();

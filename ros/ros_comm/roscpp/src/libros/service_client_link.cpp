@@ -90,6 +90,7 @@ bool ServiceClientLink::handleHeader(const Header& header)
     return false;
   }
 
+  // mark:长连接有client指定，而不是server指定
   std::string persistent;
   if (header.getValue("persistent", persistent))
   {
@@ -152,8 +153,10 @@ bool ServiceClientLink::handleHeader(const Header& header)
     m["type"] = ss->getDataType();
     m["md5sum"] = ss->getMD5Sum();
     m["callerid"] = this_node::getName();
+    // mark:server应答连接成功
     connection_->writeHeader(m, boost::bind(&ServiceClientLink::onHeaderWritten, this, _1));
 
+    // mark:添加连接的client到server的列表
     ss->addServiceClientLink(shared_from_this());
   }
 

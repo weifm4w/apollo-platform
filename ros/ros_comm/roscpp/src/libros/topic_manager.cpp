@@ -97,6 +97,7 @@ void TopicManager::start()
   xmlrpc_manager_->bind("getSubscriptions", boost::bind(&TopicManager::getSubscriptionsCallback, this, _1, _2));
   xmlrpc_manager_->bind("getPublications", boost::bind(&TopicManager::getPublicationsCallback, this, _1, _2));
 
+  // 消息发送
   poll_manager_->addPollThreadListener(boost::bind(&TopicManager::processPublishQueues, this));
 }
 
@@ -376,13 +377,13 @@ bool TopicManager::advertise(const AdvertiseOptions& ops, const SubscriberCallba
       return false;
     }
 
-    pub = lookupPublicationWithoutLock(ops.topic);
+    pub = lookupPublicationWithoutLock(ops.topic);  // mark:查找 advertised_topics_
     if (pub && pub->getNumCallbacks() == 0)
     {
       pub.reset();
     }
 
-    if (pub)
+    if (pub)  // mark:已发布过Publisher则复用
     {
       if (pub->getMD5Sum() != ops.md5sum)
       {
@@ -396,8 +397,10 @@ bool TopicManager::advertise(const AdvertiseOptions& ops, const SubscriberCallba
       return true;
     }
 
+    // mark:未发布过Publisher则新创建
     pub = PublicationPtr(boost::make_shared<Publication>(ops.topic, ops.datatype, ops.md5sum, ops.message_definition, ops.queue_size, ops.latch, ops.has_header));
     pub->addCallbacks(callbacks);
+    // mark:保存Publisher到 advertised_topics_
     advertised_topics_.push_back(pub);
   }
 
@@ -787,6 +790,7 @@ void TopicManager::publish(const std::string& topic, const boost::function<Seria
     // call inside signal() is actually relatively expensive when doing a nocopy publish.
     if (serialize)
     {
+      // MARK:唤醒消息发布线程
       poll_manager_->getPollSet().signal();
     }
   }

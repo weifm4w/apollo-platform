@@ -95,7 +95,7 @@ void PollManager::threadFunc()
       return;
     }
 
-    poll_set_.update(100);
+    poll_set_.update(100);  // mark: 100微妙超时,有连接唤醒; 有publish时通过poll_signal_唤醒
   }
 }
 

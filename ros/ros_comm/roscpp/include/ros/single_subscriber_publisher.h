@@ -40,6 +40,7 @@ namespace ros
 /**
  * \brief Allows publication of a message to a single subscriber. Only available inside subscriber connection callbacks
  */
+// mark:通过关注连接事件回调得到单个对端发布者引用
 class ROSCPP_DECL SingleSubscriberPublisher : public boost::noncopyable
 {
 public:
